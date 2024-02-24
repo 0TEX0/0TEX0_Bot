@@ -5,17 +5,19 @@ const embedIntervals = new Map();
 
 const getServerStatus = async () => {
     let serverStatus = "🔴 OFFLINE";
+    let hostname = "Server not found"
     let server;
     try {
         server = await cfx.fetchServer(config.cfxCode);
         serverStatus = "🟢 ONLINE";
+        hostname = (server.hostname)
     } catch (error) {
         if (error.response && error.response.status === 404) {
             server = null;
             serverStatus = "🔴 OFFLINE";
         }
     }
-    return { server, serverStatus };
+    return { server, serverStatus, hostname };
 };
 
 module.exports = {
@@ -29,13 +31,13 @@ module.exports = {
 
         message.reply({content: "Veuillez patienter...", ephemeral: true});
 
-        const { server, serverStatus } = await getServerStatus();
+        const { server, serverStatus, hostname } = await getServerStatus();
         const maxClients = server ? server.data.sv_maxclients : 64;
         const playersCount = server ? server.data.players.length : 0;
 
         let waitingMessage = new Discord.EmbedBuilder()
             .setColor(0x0099FF)
-            .setTitle('AlphaLife')
+            .setTitle(hostname)
             .setURL(`https://cfx.re/join/${config.cfxCode}`)
             .setDescription("Status du serveur")
             .addFields({
@@ -66,7 +68,7 @@ module.exports = {
 
             let embedStatus = new Discord.EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle('AlphaLife')
+                .setTitle(hostname)
                 .setURL(`https://cfx.re/join/${config.cfxCode}`)
                 .setDescription("Status du serveur")
                 .addFields({
